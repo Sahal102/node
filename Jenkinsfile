@@ -28,11 +28,11 @@ pipeline {
                     sh '''
                         docker save $DOCKER_IMAGE > $APP_NAME.tar
                         scp -o StrictHostKeyChecking=no $APP_NAME.tar $EC2_USER@$EC2_HOST:/home/$EC2_USER/
-                        ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST '
+                        ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "
                             docker load < /home/$EC2_USER/$APP_NAME.tar &&
                             docker rm -f $APP_NAME || true &&
                             docker run -d --name $APP_NAME -p 80:3000 $DOCKER_IMAGE
-                        '
+                        "
                     '''
                 }
             }
