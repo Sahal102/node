@@ -26,10 +26,8 @@ pipeline {
             steps {
                 sshagent (credentials: [env.SSH_KEY]) {
                     sh '''
-                        docker save $DOCKER_IMAGE | bzip2 | ssh $EC2_USER@$EC2_HOST "bunzip2 | docker load"
-                        scp -o StrictHostKeyChecking=no $APP_NAME.tar $EC2_USER@$EC2_HOST:/home/$EC2_USER/
+                        docker save $DOCKER_IMAGE | bzip2 | ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "bunzip2 | docker load"
                         ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "
-                            docker load < /home/$EC2_USER/$APP_NAME.tar &&
                             docker rm -f $APP_NAME || true &&
                             docker run -d --name $APP_NAME -p 80:3000 $DOCKER_IMAGE
                         "
