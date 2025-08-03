@@ -12,7 +12,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/Sahal102/node.git'
+                git branch: 'main', url: 'https://github.com/Sahal102/node.git'
             }
         }
 
