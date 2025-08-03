@@ -25,7 +25,7 @@ pipeline {
         stage('Copy & Deploy to EC2') {
             steps {
                 sshagent (credentials: [env.SSH_KEY]) {
-                    sh """
+                    sh '''
                         docker save $DOCKER_IMAGE > $APP_NAME.tar
                         scp -o StrictHostKeyChecking=no $APP_NAME.tar $EC2_USER@$EC2_HOST:/home/$EC2_USER/
                         ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST '
@@ -33,7 +33,7 @@ pipeline {
                             docker rm -f $APP_NAME || true &&
                             docker run -d --name $APP_NAME -p 80:3000 $DOCKER_IMAGE
                         '
-                    """
+                    '''
                 }
             }
         }
