@@ -1,56 +1,52 @@
 const express = require('express');
 const os = require('os');
+const path = require('path');
+const dotenv = require('dotenv');
+const bodyParser = require('body-parser');
+
+dotenv.config();
 const app = express();
-const port = 3000;
+const PORT = process.env.PORT || 3000;
+const APP_NAME = process.env.APP_NAME || 'Node App';
 
-// Middleware to log requests
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  next();
-});
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use('/static', express.static(path.join(__dirname, 'public')));
 
-// Serve home HTML page
+// Home
 app.get('/', (req, res) => {
   res.send(`
-    <html>
-      <head>
-        <title>Node.js App</title>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            text-align: center;
-            margin-top: 50px;
-          }
-          h1 {
-            color: #333;
-          }
-          p {
-            font-size: 1.2em;
-          }
-        </style>
-      </head>
-      <body>
-        <h1>Welcome to My Node.js App!</h1>
-        <p>Running inside a Docker container 🚀</p>
-        <p>Server Hostname: <strong>${os.hostname()}</strong></p>
-        <p>Current Time: ${new Date().toLocaleString()}</p>
-        <p>Visit <a href="/api/status">/api/status</a> for JSON output.</p>
-      </body>
-    </html>
+    <h1>${APP_NAME}</h1>
+    <p>Welcome to Dockerized Node.js app!</p>
+    <a href="/contact">Go to Contact Form</a>
   `);
 });
 
-// Simple API route
-app.get('/api/status', (req, res) => {
-  res.json({
-    status: 'ok',
-    uptime: process.uptime(),
-    hostname: os.hostname(),
-    time: new Date()
-  });
+// Contact form (GET)
+app.get('/contact', (req, res) => {
+  res.send(`
+    <h2>Contact Us</h2>
+    <form method="POST" action="/contact">
+      <input name="name" placeholder="Your name" required/><br/><br/>
+      <textarea name="message" placeholder="Your message" required></textarea><br/><br/>
+      <button type="submit">Send</button>
+    </form>
+    <br/><a href="/">Back</a>
+  `);
 });
 
-app.listen(port, () => {
-  console.log(`App is running at http://localhost:${port}`);
+// Contact form (POST)
+app.post('/contact', (req, res) => {
+  const { name, message } = req.body;
+  console.log(`📨 New message from ${name}: ${message}`);
+  res.send(`<h3>Thanks, ${name}!</h3><p>Your message has been received.</p><a href="/">Home</a>`);
+});
+
+// Health check
+app.get('/healthz', (_, res) => res.send('OK'));
+
+// 404
+app.use((_, res) => res.status(404).send('<h1>404 - Not Found</h1>'));
+
+app.listen(PORT, () => {
+  console.log(`${APP_NAME} running at http://localhost:${PORT}`);
 });
